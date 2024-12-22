@@ -33,6 +33,15 @@ async function run() {
             res.send('LOVE LOVE TUTOR SPHERE')
         })
         // Creating a Database name and collection name
+        const userCollection = client.db('tutorSphere').collection('users');
+
+        // POST: Get the user from client side and Post TO database
+        app.post('/users', async(req, res)=>{
+            const newUser = req.body;
+            console.log(newUser);
+            const result = await userCollection.insertOne(newUser);
+            res.send("this is a new user",result);
+        }) 
         
     } finally {
         // Ensures that the client will close when you finish/error
