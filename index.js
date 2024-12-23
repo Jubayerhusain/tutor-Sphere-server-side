@@ -77,13 +77,22 @@ async function run() {
             const result = await tutorsCollection.find(filter).toArray();
             res.send(result)
         })
+        // GET the Signle tuitorial data
+        app.get('/tutorial/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const result = await tutorsCollection.findOne(filter);
+            res.send(result)
+        })
         // PUT: Get the data from client side form and update to database collection
         app.put('/tutorial/:id', async (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
             const result = await tutorsCollection.updateOne({
                 _id: new ObjectId(id)
-            },{
+            }, {
                 $set: updatedData
             })
             res.send(result);
