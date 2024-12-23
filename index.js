@@ -57,15 +57,15 @@ async function run() {
         // POST: Get the New Tutors from client side
         app.post('/tutors', async (req, res) => {
             const newTutor = req.body;
-            console.log(newUser);
+            console.log(newTutor);
             const result = await tutorsCollection.insertOne(newTutor);
             res.send(result)
         })
         // GET: Get the tutors apis from database collection
-        // app.get(`/tutors`, async (req, res)=>{
-        //     const result = await tutorsCollection.find().toArray();
-        //     res.send(result)
-        // })
+        app.get(`/tutors`, async (req, res)=>{
+            const result = await tutorsCollection.find().toArray();
+            res.send(result)
+        })
 
 
     } finally {
