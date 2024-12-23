@@ -34,6 +34,7 @@ async function run() {
         })
         // Creating a Database name and collection name
         const userCollection = client.db('tutorSphere').collection('users');
+        const languegesCategory= client.db('tutorSphere').collection('languegesCategory');
 
         // POST: Get the user from client side and Post TO database
         app.post('/users', async(req, res)=>{
@@ -47,6 +48,12 @@ async function run() {
             const result = await userCollection.find().toArray();
             res.send(result)
         })
+        // GET: Get the languegesCategory from database
+        app.get('/langueges', async(req,res)=>{
+            const result = await languegesCategory.find().toArray();
+            res.send(result)
+        })
+
         
     } finally {
         // Ensures that the client will close when you finish/error
