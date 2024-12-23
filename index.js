@@ -77,6 +77,15 @@ async function run() {
             const result = await tutorsCollection.find(filter).toArray();
             res.send(result)
         })
+        // GET: Get the specipic data from database using category
+        app.get('/tutors/category/:category', async(req, res)=>{
+            const category = req.params.category;
+            const filter = {
+                language: category
+            };
+            const result = await tutorsCollection.find(filter).toArray();
+            res.send(result)
+        })
         // GET the Signle tuitorial data
         app.get('/tutorial/:id', async (req, res) => {
             const id = req.params.id;
