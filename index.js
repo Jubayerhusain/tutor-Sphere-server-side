@@ -12,6 +12,7 @@ app.use(express.json());
 const {
     MongoClient,
     ServerApiVersion,
+    ObjectId,
 } = require('mongodb');
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.wr4sb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -62,18 +63,29 @@ async function run() {
             res.send(result)
         })
         // GET: Get the tutors apis from database collection
-        app.get(`/tutors`, async (req, res)=>{
+        app.get(`/tutors`, async (req, res) => {
             const result = await tutorsCollection.find().toArray();
             res.send(result)
         })
 
         //GET: Get the tutorial Apis for specific email
-        app.get('/tutors/email/:email', async(req,res)=>{
-            const email = req.body.email;
+        app.get('/tutors/email/:email', async (req, res) => {
+            const email = req.params.email;
             const filter = {
                 email: email
             };
             const result = await tutorsCollection.find(filter).toArray();
+            res.send(result)
+        })
+        // PUT: Get the data from client side form and update to database collection
+        app.put('/tutorial/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+            const result = await tutorsCollection.updateOne({
+                _id: new ObjectId(id)
+            },{
+                $set: updatedData
+            })
             res.send(result);
         })
     } finally {
