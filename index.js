@@ -1,4 +1,4 @@
-// require('dotenv').config();
+require('dotenv').config();
 const express = require('express')
 const app = express()
 const cors = require('cors');
@@ -41,7 +41,12 @@ async function run() {
             console.log(newUser);
             const result = await userCollection.insertOne(newUser);
             res.send("this is a new user",result);
-        }) 
+        })
+        // GET: Get the users from database
+        app.get('/users', async(req,res)=>{
+            const result = await userCollection.find().toArray();
+            res.send(result)
+        })
         
     } finally {
         // Ensures that the client will close when you finish/error
