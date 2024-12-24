@@ -7,10 +7,31 @@ const cookieParser = require('cookie-parser');
 const port = process.env.PORT || 4000;
 
 //middleWare
-app.use(cors())
+app.use(cors({
+    origin: [`http://localhost:5173`, `https://turtorsphere.web.app`],
+    credentials: true
+}))
 app.use(express.json());
 app.use(cookieParser())
 
+// Verify token
+const veryfyToken = (req, res, next) => {
+    const token = req.cookies?.token
+    if (!token) {
+        return res.status(401).send({
+            message: 'unAuthorized access'
+        })
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({
+                message: 'unAuthorized access'
+            })
+        }
+        req.user=decoded
+        next();
+    })
+}
 
 const {
     MongoClient,
@@ -42,16 +63,28 @@ async function run() {
         const tutorsCollection = client.db('tutorSphere').collection('tutorsCollection');
 
         //JWT auth Related APIs
-        app.post('/jwt', (req,res)=>{
+        app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
                 expiresIn: '5h'
             });
-            res.cookie('token', token,{
-                httpOnly: true,
-                secure: false
-            })
-            .send({success: true})
+            res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: false
+                })
+                .send({
+                    success: true
+                })
+        })
+
+        app.post('/logout', (req, res) => {
+            res.clearCookie('token', {
+                    httpOnly: true,
+                    secure: false,
+                })
+                .send({
+                    success: true
+                })
         })
         // POST: Get the user from client side and Post TO database
         app.post('/users', async (req, res) => {
@@ -84,16 +117,20 @@ async function run() {
         })
 
         //GET: Get the tutorial Apis for specific email
-        app.get('/tutors/email/:email', async (req, res) => {
+        app.get('/tutors/email/:email',veryfyToken, async (req, res) => {
             const email = req.params.email;
             const filter = {
                 email: email
             };
+            console.log(req.cookies?.token);
+            if(req.user.email !== req.params.email){
+                return res.status(403).send({message: 'forbidden access'})
+            }
             const result = await tutorsCollection.find(filter).toArray();
             res.send(result)
         })
         // GET: Get the specipic data from database using category
-        app.get('/tutors/category/:category', async(req, res)=>{
+        app.get('/tutors/category/:category', async (req, res) => {
             const category = req.params.category;
             const filter = {
                 language: category
@@ -122,7 +159,7 @@ async function run() {
             res.send(result);
         })
         //DELETE: Delete the product from database
-        app.delete('/tutorial/:id', async(req, res)=>{
+        app.delete('/tutorial/:id', async (req, res) => {
             const id = req.params.id;
             const deletedId = {
                 _id: new ObjectId(id)
