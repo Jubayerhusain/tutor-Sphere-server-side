@@ -188,6 +188,15 @@ async function run() {
             const result = await bookedTutors.find().toArray()
             res.send(result)
         })
+        // GET: get the specific booked tutors from database
+        app.get('/booked-tutors/:email', async(req,res)=>{
+            const email = req.params.email;
+            const filter = {
+                email: email
+            }
+            const result = await bookedTutors.find(filter).toArray();
+            res.send(result)
+        })
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
