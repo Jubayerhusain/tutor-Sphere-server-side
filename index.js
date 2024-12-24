@@ -66,6 +66,7 @@ async function run() {
         const userCollection = client.db('tutorSphere').collection('users');
         const languegesCategory = client.db('tutorSphere').collection('languegesCategory');
         const tutorsCollection = client.db('tutorSphere').collection('tutorsCollection');
+        const bookedTutors = client.db('tutorSphere').collection('bookedTutors');
 
         //JWT auth Related APIs
         app.post('/jwt', (req, res) => {
@@ -167,13 +168,19 @@ async function run() {
             })
             res.send(result);
         })
-        //DELETE: Delete the product from database
+        // DELETE: Delete the product from database
         app.delete('/tutorial/:id', async (req, res) => {
             const id = req.params.id;
             const deletedId = {
                 _id: new ObjectId(id)
             };
             const result = await tutorsCollection.deleteOne(deletedId);
+            res.send(result)
+        })
+        // POST: get the Booked tutors
+        app.post('/booked-tutors', async(req, res)=>{
+            const tutors = req.body;
+            const result = await bookedTutors.insertOne(tutors);
             res.send(result)
         })
     } finally {
