@@ -8,7 +8,12 @@ const port = process.env.PORT || 4000;
 
 //middleWare
 app.use(cors({
-    origin: [`http://localhost:5173`, `https://turtorsphere.web.app`],
+    origin: [
+        `http://localhost:5173`,
+        `https://turtorsphere.web.app`,
+        `https://turtorsphere.firebaseapp.com`
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }))
 app.use(express.json());
@@ -28,7 +33,7 @@ const veryfyToken = (req, res, next) => {
                 message: 'unAuthorized access'
             })
         }
-        req.user=decoded
+        req.user = decoded
         next();
     })
 }
@@ -70,7 +75,8 @@ async function run() {
             });
             res.cookie('token', token, {
                     httpOnly: true,
-                    secure: false
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
                 })
                 .send({
                     success: true
@@ -80,7 +86,8 @@ async function run() {
         app.post('/logout', (req, res) => {
             res.clearCookie('token', {
                     httpOnly: true,
-                    secure: false,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
                 })
                 .send({
                     success: true
@@ -117,14 +124,16 @@ async function run() {
         })
 
         //GET: Get the tutorial Apis for specific email
-        app.get('/tutors/email/:email',veryfyToken, async (req, res) => {
+        app.get('/tutors/email/:email', veryfyToken, async (req, res) => {
             const email = req.params.email;
             const filter = {
                 email: email
             };
             console.log(req.cookies?.token);
-            if(req.user.email !== req.params.email){
-                return res.status(403).send({message: 'forbidden access'})
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({
+                    message: 'forbidden access'
+                })
             }
             const result = await tutorsCollection.find(filter).toArray();
             res.send(result)
