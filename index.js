@@ -2,11 +2,14 @@ require('dotenv').config();
 const express = require('express')
 const app = express()
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const port = process.env.PORT || 4000;
 
 //middleWare
 app.use(cors())
 app.use(express.json());
+app.use(cookieParser())
 
 
 const {
@@ -38,6 +41,18 @@ async function run() {
         const languegesCategory = client.db('tutorSphere').collection('languegesCategory');
         const tutorsCollection = client.db('tutorSphere').collection('tutorsCollection');
 
+        //JWT auth Related APIs
+        app.post('/jwt', (req,res)=>{
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+                expiresIn: '5h'
+            });
+            res.cookie('token', token,{
+                httpOnly: true,
+                secure: false
+            })
+            .send({success: true})
+        })
         // POST: Get the user from client side and Post TO database
         app.post('/users', async (req, res) => {
             const newUser = req.body;
