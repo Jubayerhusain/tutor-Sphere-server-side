@@ -9,13 +9,12 @@ const port = process.env.PORT || 4000;
 //middleWare
 app.use(cors({
     origin: [
-        `http://localhost:5173`,
-        `http://localhost:5174`,
-        `https://turtorsphere.web.app`,
-        `https://turtorsphere.firebaseapp.com`
+        'http://localhost:5174', 
+        'https://turtorsphere.web.app', 
+        'https://turtorsphere.firebaseapp.com'  
     ],
     credentials: true
-}))
+}));
 app.use(express.json());
 app.use(cookieParser())
 const {
@@ -246,7 +245,7 @@ async function run() {
             try {
                 const result = await tutorsCollection.updateOne(
                     { _id: new ObjectId(tutorId) },
-                    { $inc: { review: 1 } } // Increment the review field by 1
+                    { $inc: { review: 1 } }
                 );
         
                 if (result.modifiedCount > 0) {
@@ -256,6 +255,7 @@ async function run() {
                 }
             } catch (error) {
                 res.status(500).json({ error: "Failed to update review count" });
+                console.log(error);
             }
         });
         
