@@ -17,6 +17,11 @@ app.use(cors({
 }))
 app.use(express.json());
 app.use(cookieParser())
+const {
+    MongoClient,
+    ServerApiVersion,
+    ObjectId,
+} = require('mongodb');
 
 // Verify token
 const veryfyToken = (req, res, next) => {
@@ -36,13 +41,6 @@ const veryfyToken = (req, res, next) => {
         next();
     })
 }
-
-const {
-    MongoClient,
-    ServerApiVersion,
-    ObjectId,
-} = require('mongodb');
-
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.wr4sb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -52,6 +50,7 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
 
 async function run() {
     try {
@@ -66,7 +65,6 @@ async function run() {
         const languegesCategory = client.db('tutorSphere').collection('languegesCategory');
         const tutorsCollection = client.db('tutorSphere').collection('tutorsCollection');
         const bookedTutors = client.db('tutorSphere').collection('bookedTutors');
-
         //JWT auth Related APIs
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -187,17 +185,64 @@ async function run() {
             res.send(result)
         })
         // POST: get the Booked tutors
-        app.post('/booked-tutors', async(req, res)=>{
-            const tutors = req.body;
-            const result = await bookedTutors.insertOne(tutors);
-            res.send(result)
-        })
+        // app.post('/booked-tutors', async(req, res)=>{
+        //     const tutors = req.body;
+        //     const result = await bookedTutors.insertOne(tutors);
+        //     res.send(result)
+        // })
+        // Route to book a tutor
+        app.post("/bookedTutorsPost", async (req, res) => {
+            const bookingData = req.body;
+          
+            // Check for required fields
+            if (!bookingData.userEmail || !bookingData.email) {
+              return res
+                .status(400)
+                .send({ success: false, message: "Invalid booking data" });
+            }
+          
+            try {
+              // Insert booking data into the database
+              const result = await bookedTutors.insertOne(bookingData);
+              res
+                .status(201)
+                .send({ success: true, message: "Booking successful", result });
+            } catch (error) {
+              if (error.code === 11000) {
+                // Duplicate booking detected
+                res.status(409).send({
+                  success: false,
+                  message: "This tutor is already booked by the user",
+                });
+              } else {
+                // Other server errors
+                res.status(500).send({
+                  success: false,
+                  message: "An error occurred while booking the tutor",
+                });
+              }
+            }
+          });
+          
+  
 
-        // GET: get the booked tutors from database
-        app.get('/booked-tutors', async (req, res) => {
-            const result = await bookedTutors.find().toArray()
-            res.send(result)
-        })
+          app.get('/booked-tutors', async (req, res) => {
+            try {
+              const result = await bookedTutors.find().toArray();
+              res.status(200).send(result);
+            } catch (error) {
+              res.status(500).send({
+                success: false,
+                message: "An error occurred while fetching booked tutors",
+              });
+            }
+          });
+          
+        // // GET: get the booked tutors from database
+        // app.get('/booked-tutors', async (req, res) => {
+        //     const result = await bookedTutors.find().toArray()
+        //     res.send(result)
+        // })
 
     } finally {
         // Ensures that the client will close when you finish/error
