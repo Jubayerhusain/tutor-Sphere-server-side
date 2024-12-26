@@ -13,7 +13,6 @@ app.use(cors({
         `https://turtorsphere.web.app`,
         `https://turtorsphere.firebaseapp.com`
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }))
 app.use(express.json());
@@ -118,24 +117,21 @@ async function run() {
             const result = await tutorsCollection.insertOne(newTutor);
             res.send(result)
         })
-        // GET: Get the tutors apis from database collection
-        // app.get(`/tutors`, async (req, res) => {
-        //     const search = req.query.search;
-        //     console.log(search);
-        //     const result = await tutorsCollection.find().toArray();
-        //     res.send(result)
-        // })
+        // GET: Get the tutors apis from database collection using search
         app.get('/tutors', async (req, res) => {
-            const search = req.query.search; 
+            const search = req.query.search;
             console.log(`Search query: ${search}`);
-    
-            const filter = search 
-                ? { language: { $regex: search, $options: 'i' } }
-                : {};
+
+            const filter = search ? {
+                language: {
+                    $regex: search,
+                    $options: 'i'
+                }
+            } : {};
             const result = await tutorsCollection.find(filter).toArray();
             res.send(result);
         });
-        
+
 
         //GET: Get the tutorial Apis for specific email
         app.get('/tutors/email/:email', veryfyToken, async (req, res) => {
@@ -196,20 +192,13 @@ async function run() {
             const result = await bookedTutors.insertOne(tutors);
             res.send(result)
         })
+
         // GET: get the booked tutors from database
         app.get('/booked-tutors', async (req, res) => {
             const result = await bookedTutors.find().toArray()
             res.send(result)
         })
-        // GET: get the specific booked tutors from database
-        // app.get('/booked-tutors/:email', async(req,res)=>{
-        //     const email = req.params.email;
-        //     const filter = {
-        //         email: email
-        //     }
-        //     const result = await bookedTutors.find(filter).toArray();
-        //     res.send(result)
-        // })
+
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
