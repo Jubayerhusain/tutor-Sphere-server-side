@@ -225,7 +225,7 @@ async function run() {
           });
           
   
-
+        // // GET: get the booked tutors from database
           app.get('/booked-tutors', async (req, res) => {
             try {
               const result = await bookedTutors.find().toArray();
@@ -237,6 +237,27 @@ async function run() {
               });
             }
           });
+
+          // update a review btn
+          app.put('/booked-tutors/review/:tutorId', async (req, res) => {
+            const { tutorId } = req.params;
+        
+            try {
+                const result = await tutorsCollection.updateOne(
+                    { _id: new ObjectId(tutorId) },
+                    { $inc: { review: 1 } } // Increment the review field by 1
+                );
+        
+                if (result.modifiedCount > 0) {
+                    res.status(200).json({ message: "Review count updated successfully" });
+                } else {
+                    res.status(404).json({ error: "Tutor not found" });
+                }
+            } catch (error) {
+                res.status(500).json({ error: "Failed to update review count" });
+            }
+        });
+        
           
         // // GET: get the booked tutors from database
         // app.get('/booked-tutors', async (req, res) => {
