@@ -9,7 +9,7 @@ const port = process.env.PORT || 4000;
 //middleWare
 app.use(cors({
     origin: [
-        'http://localhost:5174', 
+        'http://localhost:5173',
         'https://turtorsphere.web.app', 
         'https://turtorsphere.firebaseapp.com'  
     ],
